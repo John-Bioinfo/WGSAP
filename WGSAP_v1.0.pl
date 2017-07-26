@@ -178,8 +178,9 @@ if ($step =~ /1/) {
 				close FT;
 				system("sh $bin/bin/Add_time_for_script.sh $laneDir/CleanData/$sampleId.$lib.$lane.ft.sh") == 0 || die $!;
 				system("chmod 755 $laneDir/CleanData/$sampleId.$lib.$lane.ft.sh") == 0 || die $!;
-				system("echo -e \"sh $laneDir/CleanData/$sampleId.$lib.$lane.ft.sh >$laneDir/CleanData/$sampleId.$lib.$lane.ft.sh.o 2>$laneDir/CleanData/$sampleId.$lib.$lane.ft.sh.e\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
+				system("echo -e \"sh $laneDir/CleanData/$sampleId.$lib.$lane.ft.sh >$laneDir/CleanData/$sampleId.$lib.$lane.ft.sh.o 2>$laneDir/CleanData/$sampleId.$lib.$lane.ft.sh.e &\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
 			}
+			system("echo -e \"wait\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
 		}
 	}	
 }
@@ -234,8 +235,9 @@ if ($step =~ /2/) {
 				close AG;
 				system("sh $bin/bin/Add_time_for_script.sh $laneDir/Alignment/$sampleId.$lib.$lane.ag.sh") == 0 || die $!;
 				system("chmod 755 $laneDir/Alignment/$sampleId.$lib.$lane.ag.sh") == 0 || die $!;
-				system("echo -e \"sh $laneDir/Alignment/$sampleId.$lib.$lane.ag.sh >$laneDir/Alignment/$sampleId.$lib.$lane.ag.sh.o 2>$laneDir/Alignment/$sampleId.$lib.$lane.ag.sh.e\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
+				system("echo -e \"sh $laneDir/Alignment/$sampleId.$lib.$lane.ag.sh >$laneDir/Alignment/$sampleId.$lib.$lane.ag.sh.o 2>$laneDir/Alignment/$sampleId.$lib.$lane.ag.sh.e &\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
 			}
+			system("echo -e \"wait\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
 			open BM, ">$libDir/$sampleId.$lib.bm.sh" or die $!;
 			print BM "# Step2 : Alignment\n";
 			if ((keys %{$sampleInfo{$sampleId}{$lib}}) > 1) {
