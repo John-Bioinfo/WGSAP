@@ -178,7 +178,7 @@ if ($step =~ /1/) {
 				close FT;
 				system("sh $bin/bin/Add_time_for_script.sh $laneDir/CleanData/$sampleId.$lib.$lane.ft.sh") == 0 || die $!;
 				system("chmod 755 $laneDir/CleanData/$sampleId.$lib.$lane.ft.sh") == 0 || die $!;
-				system("echo -e \"sh $laneDir/CleanData/$sampleId.$lib.$lane.ft.sh\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
+				system("echo -e \"sh $laneDir/CleanData/$sampleId.$lib.$lane.ft.sh >$laneDir/CleanData/$sampleId.$lib.$lane.ft.sh.o 2>$laneDir/CleanData/$sampleId.$lib.$lane.ft.sh.e\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
 			}
 		}
 	}	
@@ -200,7 +200,7 @@ if ($step !~ /1/) {
 				close FT;
 				system("sh $bin/bin/Add_time_for_script.sh $laneDir/CleanData/$sampleId.$lib.$lane.ln.sh") == 0 || die $!;
 				system("chmod 755 $laneDir/CleanData/$sampleId.$lib.$lane.ln.sh") == 0 || die $!;
-				system("echo -e \"sh $laneDir/CleanData/$sampleId.$lib.$lane.ln.sh\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
+				system("echo -e \"sh $laneDir/CleanData/$sampleId.$lib.$lane.ln.sh >$laneDir/CleanData/$sampleId.$lib.$lane.ln.sh.o 2>$laneDir/CleanData/$sampleId.$lib.$lane.ln.sh.e\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
 			}
 		}
 	}	
@@ -234,7 +234,7 @@ if ($step =~ /2/) {
 				close AG;
 				system("sh $bin/bin/Add_time_for_script.sh $laneDir/Alignment/$sampleId.$lib.$lane.ag.sh") == 0 || die $!;
 				system("chmod 755 $laneDir/Alignment/$sampleId.$lib.$lane.ag.sh") == 0 || die $!;
-				system("echo -e \"sh $laneDir/Alignment/$sampleId.$lib.$lane.ag.sh\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
+				system("echo -e \"sh $laneDir/Alignment/$sampleId.$lib.$lane.ag.sh >$laneDir/Alignment/$sampleId.$lib.$lane.ag.sh.o 2>$laneDir/Alignment/$sampleId.$lib.$lane.ag.sh.e\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
 			}
 			open BM, ">$libDir/$sampleId.$lib.bm.sh" or die $!;
 			print BM "# Step2 : Alignment\n";
@@ -282,7 +282,7 @@ if ($step =~ /2/) {
 			close BM;
 			system("sh $bin/bin/Add_time_for_script.sh $libDir/$sampleId.$lib.bm.sh") == 0 || die $!;
 			system("chmod 755 $libDir/$sampleId.$lib.bm.sh") == 0 || die $!;
-			system("echo -e \"sh $libDir/$sampleId.$lib.bm.sh\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
+			system("echo -e \"sh $libDir/$sampleId.$lib.bm.sh >$libDir/$sampleId.$lib.bm.sh.o 2>$libDir/$sampleId.$lib.bm.sh.e\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
 		}
 	}	
 }
@@ -312,7 +312,7 @@ if ($step =~ /3/ or $step =~ /4/) {
 			close VC;
 			system("sh $bin/bin/Add_time_for_script.sh $sampleDir/$sampleId.vc.sh") == 0 || die $!;
 			system("chmod 755 $sampleDir/$sampleId.vc.sh") == 0 || die $!;
-			system("echo -e \"sh $sampleDir/$sampleId.vc.sh\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
+			system("echo -e \"sh $sampleDir/$sampleId.vc.sh >$sampleDir/$sampleId.vc.sh.o 2>$sampleDir/$sampleId.vc.sh.e\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
 		}
 	}
 }
@@ -348,7 +348,7 @@ if ($step =~ /3/) {
 			close SA;
 	                system("sh $bin/bin/Add_time_for_script.sh $snpDir/$sampleId.snp.annovar.sh") == 0 || die $!;
         	        system("chmod 755 $snpDir/$sampleId.snp.annovar.sh") == 0 || die $!;
-			system("echo -e \"sh $snpDir/$sampleId.snp.sh && sh $snpDir/$sampleId.snp.annovar.sh &\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
+			system("echo -e \"sh $snpDir/$sampleId.snp.sh >$snpDir/$sampleId.snp.sh.o 2>$snpDir/$sampleId.snp.sh.e && sh $snpDir/$sampleId.snp.annovar.sh >$snpDir/$sampleId.snp.annovar.sh.o 2>$snpDir/$sampleId.snp.annovar.sh.e &\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
 		}
 		if ($step =~ /5/ && $at eq "at2") {
 			open SA, ">$snpDir/$sampleId.snp.annovar.sh" or die $!;
@@ -375,7 +375,7 @@ if ($step =~ /3/) {
 			close SA;
 	                system("sh $bin/bin/Add_time_for_script.sh $snpDir/$sampleId.snp.annovar.sh") == 0 || die $!;
         	        system("chmod 755 $snpDir/$sampleId.snp.annovar.sh") == 0 || die $!;
-			system("echo -e \"sh $snpDir/$sampleId.snp.sh && sh $snpDir/$sampleId.snp.annovar.sh &\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
+			system("echo -e \"sh $snpDir/$sampleId.snp.sh >$snpDir/$sampleId.snp.sh.o 2>$snpDir/$sampleId.snp.sh.e && sh $snpDir/$sampleId.snp.annovar.sh >$snpDir/$sampleId.snp.annovar.sh.o 2>$snpDir/$sampleId.snp.annovar.sh.e &\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
 		}
 	}
 }
@@ -412,7 +412,7 @@ if ($step =~ /4/) {
 			close IA;
 			system("sh $bin/bin/Add_time_for_script.sh $indelDir/$sampleId.indel.annovar.sh") == 0 || die $!;
                         system("chmod 755 $indelDir/$sampleId.indel.annovar.sh") == 0 || die $!;
-			system("echo -e \"sh $indelDir/$sampleId.indel.sh && sh $indelDir/$sampleId.indel.annovar.sh &\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
+			system("echo -e \"sh $indelDir/$sampleId.indel.sh >$indelDir/$sampleId.indel.sh.o 2>$indelDir/$sampleId.indel.sh.e && sh $indelDir/$sampleId.indel.annovar.sh >$indelDir/$sampleId.indel.annovar.sh.o 2>$indelDir/$sampleId.indel.annovar.sh.e &\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
                 }
 		if ($step =~ /5/ && $at eq "at2") {
 			open IA, ">$indelDir/$sampleId.indel.annovar.sh" or die $!;
@@ -439,7 +439,7 @@ if ($step =~ /4/) {
                         close IA;
                         system("sh $bin/bin/Add_time_for_script.sh $indelDir/$sampleId.indel.annovar.sh") == 0 || die $!;
                         system("chmod 755 $indelDir/$sampleId.indel.annovar.sh") == 0 || die $!;
-                        system("echo -e \"sh $indelDir/$sampleId.indel.sh && sh $indelDir/$sampleId.indel.annovar.sh &\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
+                        system("echo -e \"sh $indelDir/$sampleId.indel.sh >$indelDir/$sampleId.indel.sh.o 2>$indelDir/$sampleId.indel.sh.e && sh $indelDir/$sampleId.indel.annovar.sh >$indelDir/$sampleId.indel.annovar.sh.o 2>$indelDir/$sampleId.indel.annovar.sh.e &\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
 			system("echo -e \"wait\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
                 }
         }
@@ -455,7 +455,7 @@ if ($step =~ /3/ && $step =~ /4/) {
 		print CAT "#rm -rf $java_tmp\n\n";
 		close CAT;
 		system("sh $bin/bin/Add_time_for_script.sh $projectDir/$sampleId/cat.variants.sh") == 0 || die $!;
-		system("echo -e \"sh $projectDir/$sampleId/cat.variants.sh\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
+		system("echo -e \"sh $projectDir/$sampleId/cat.variants.sh >$projectDir/$sampleId/cat.variants.sh.o 2>$projectDir/$sampleId/cat.variants.sh.e\\n\" >> $projectDir/$sampleId.sh") == 0 || die $!;
 	}	
 }
 
