@@ -260,6 +260,7 @@ if ($step =~ /2/) {
 			print BM "echo \"BAM stastics\"\n";
 			# print BM "source /WORK/app/osenv/ln1/set2.sh\n\n" if (defined $target_region);
 			print BM "perl $bin/bin/QC_exome.pl -i $libDir/$sampleId.$lib.dup.bam -r $target_region -o $libDir/QC -plot &\n\n" if (defined $target_region);
+			print BM "perl $bin/bin/QC_wgs.pl -i $libDir/$sampleId.$lib.dup.bam -o $libDir/QC &\n\n" unless (defined $target_region);
 			# Local relignment
 			print BM "# Local relignment\n";
 			print BM "echo \"Local relignment\"\n";
@@ -279,8 +280,9 @@ if ($step =~ /2/) {
 			} else {
 				print BM "java -Xmx20g -Djava.io.tmpdir=$java_tmp -jar $gatk \\\n-T BaseRecalibrator \\\n-nct $t \\\n-R $ref \\\n-I $libDir/$sampleId.$lib.dup.realign.bam \\\n-knownSites $bin/db/gatk/dbsnp_138.hg19.vcf \\\n-knownSites $bin/db/gatk/Mills_and_1000G_gold_standard.indels.hg19.sites.vcf \\\n-knownSites $bin/db/gatk/1000G_phase1.indels.hg19.sites.vcf \\\n-o $libDir/$sampleId.$lib.dup.realign.grp\n\n";
 			}
-			print BM "java -Xmx20g -Djava.io.tmpdir=$java_tmp -jar $gatk \\\n-T PrintReads \\\n-nct $t \\\n-R $ref \\\n-I $libDir/$sampleId.$lib.dup.realign.bam \\\n-BQSR $libDir/$sampleId.$lib.dup.realign.grp \\\n-o $libDir/$sampleId.$lib.dup.realign.recal.bam\n\n";
-			print BM "rm $libDir/$sampleId.$lib.dup.realign.bam $libDir/$sampleId.$lib.dup.realign.bai\n\n";
+			# 用于归档备份bam文件，注释可以加速分析
+			# print BM "java -Xmx20g -Djava.io.tmpdir=$java_tmp -jar $gatk \\\n-T PrintReads \\\n-nct $t \\\n-R $ref \\\n-I $libDir/$sampleId.$lib.dup.realign.bam \\\n-BQSR $libDir/$sampleId.$lib.dup.realign.grp \\\n-o $libDir/$sampleId.$lib.dup.realign.recal.bam\n\n";
+			# print BM "rm $libDir/$sampleId.$lib.dup.realign.bam $libDir/$sampleId.$lib.dup.realign.bai\n\n";
 			close BM;
 			system("sh $bin/bin/Add_time_for_script.sh $libDir/$sampleId.$lib.bm.sh") == 0 || die $!;
 			system("chmod 755 $libDir/$sampleId.$lib.bm.sh") == 0 || die $!;
@@ -301,14 +303,39 @@ if ($step =~ /3/ or $step =~ /4/) {
 #				system("rm $sampleDir/$sampleId.$lib.final.bam") == 0 || die $!;
 #			}
 			print VC "if [ -s \"$sampleDir/$sampleId.$lib.final.bam\" ]; then rm $sampleDir/$sampleId.$lib.final.bam; fi\n\n";
-			print VC "ln -s $sampleDir/$lib/$sampleId.$lib.dup.realign.recal.bam $sampleDir/$sampleId.$lib.final.bam\n\n";
-			print VC "$samtools index $sampleDir/$sampleId.$lib.final.bam\n\n";
+			print VC "if [ -s \"$sampleDir/$sampleId.$lib.final.bai\" ]; then rm $sampleDir/$sampleId.$lib.final.bai; fi\n\n";
+			print VC "ln -s $sampleDir/$lib/$sampleId.$lib.dup.realign.bam $sampleDir/$sampleId.$lib.final.bam\n\n";
+			#print VC "$samtools index $sampleDir/$sampleId.$lib.final.bam\n\n";
+			print VC "ln -s $sampleDir/$lib/$sampleId.$lib.dup.realign.bai $sampleDir/$sampleId.$lib.final.bai\n\n";
 			print VC "echo $sampleDir/$sampleId.$lib.final.bam >> $projectDir/bam.lst\n\n";
 			if (defined $target_region) {
-				print VC "java -Xmx20g -Djava.io.tmpdir=$java_tmp -jar $gatk \\\n-T HaplotypeCaller \\\n-nct $t \\\n-R $ref \\\n-I $sampleDir/$sampleId.$lib.final.bam \\\n--dbsnp $bin/db/gatk/dbsnp_138.hg19.vcf \\\n--genotyping_mode DISCOVERY \\\n-stand_emit_conf 10 \\\n-stand_call_conf 50 \\\n-o $sampleDir/$sampleId.variants.vcf \\\n-L $target_region \\\n-ip $interval_padding\n\n";
+				#print VC "java -Xmx20g -Djava.io.tmpdir=$java_tmp -jar $gatk \\\n-T HaplotypeCaller \\\n-nct $t \\\n-R $ref \\\n-I $sampleDir/$sampleId.$lib.final.bam \\\n--dbsnp $bin/db/gatk/dbsnp_138.hg19.vcf \\\n--genotyping_mode DISCOVERY \\\n-stand_emit_conf 10 \\\n-stand_call_conf 50 \\\n-o $sampleDir/$sampleId.variants.vcf \\\n-L $target_region \\\n-ip $interval_padding\n\n";
+				for (my $a=1; $a<7; $a++) {
+					print VC "java -Xmx10g -Djava.io.tmpdir=$java_tmp -jar $gatk \\\n-T HaplotypeCaller \\\n-nct 10 \\\n-R $ref \\\n-I $sampleDir/$sampleId.$lib.final.bam \\\n--dbsnp $bin/db/gatk/dbsnp_138.hg19.vcf \\\n--genotyping_mode DISCOVERY \\\n-stand_emit_conf 10 \\\n-stand_call_conf 50 \\\n-o $sampleDir/$sampleId.variants.$a.vcf \\\n-L $bin/db/exome/split/target.$a.bed \\\n-ip $interval_padding \\\n-BQSR $projectDir/$sampleId/$lib/$sampleId.$lib.dup.realign.grp &\n\n";
+				}
 			} else {
-				print VC "java -Xmx20g -Djava.io.tmpdir=$java_tmp -jar $gatk \\\n-T HaplotypeCaller \\\n-nct $t \\\n-R $ref \\\n-I $sampleDir/$sampleId.$lib.final.bam \\\n--dbsnp $bin/db/gatk/dbsnp_138.hg19.vcf \\\n--genotyping_mode DISCOVERY \\\n-stand_emit_conf 10 \\\n-stand_call_conf 50 \\\n-o $sampleDir/$sampleId.variants.vcf\n\n";
+				# print VC "java -Xmx20g -Djava.io.tmpdir=$java_tmp -jar $gatk \\\n-T HaplotypeCaller \\\n-nct $t \\\n-R $ref \\\n-I $sampleDir/$sampleId.$lib.final.bam \\\n--dbsnp $bin/db/gatk/dbsnp_138.hg19.vcf \\\n--genotyping_mode DISCOVERY \\\n-stand_emit_conf 10 \\\n-stand_call_conf 50 \\\n-o $sampleDir/$sampleId.variants.vcf\n\n";
+				my @L_list = (
+					'-L chrM -L chr1 -L chr2',
+					'-L chr3 -L chr4 -L chr5',
+					'-L chr6 -L chr7 -L chr8',
+					'-L chr9 -L chr10 -L chr11 -L chr12',
+					'-L chr13 -L chr14 -L chr15 -L chr16 -L chr17 -L chr18',
+					'-L chr19 -L chr20 -L chr21 -L chr22 -L chrX -L chrY -L chr1_gl000191_random -L chr1_gl000192_random -L chr4_ctg9_hap1 -L chr4_gl000193_random -L chr4_gl000194_random -L chr6_apd_hap1 -L chr6_cox_hap2 -L chr6_dbb_hap3 -L chr6_mann_hap4 -L chr6_mcf_hap5 -L chr6_qbl_hap6 -L chr6_ssto_hap7 -L chr7_gl000195_random -L chr8_gl000196_random -L chr8_gl000197_random -L chr9_gl000198_random -L chr9_gl000199_random -L chr9_gl000200_random -L chr9_gl000201_random -L chr11_gl000202_random -L chr17_ctg5_hap1 -L chr17_gl000203_random -L chr17_gl000204_random -L chr17_gl000205_random -L chr17_gl000206_random -L chr18_gl000207_random -L chr19_gl000208_random -L chr19_gl000209_random -L chr21_gl000210_random -L chrUn_gl000211 -L chrUn_gl000212 -L chrUn_gl000213 -L chrUn_gl000214 -L chrUn_gl000215 -L chrUn_gl000216 -L chrUn_gl000217 -L chrUn_gl000218 -L chrUn_gl000219 -L chrUn_gl000220 -L chrUn_gl000221 -L chrUn_gl000222 -L chrUn_gl000223 -L chrUn_gl000224 -L chrUn_gl000225 -L chrUn_gl000226 -L chrUn_gl000227 -L chrUn_gl000228 -L chrUn_gl000229 -L chrUn_gl000230 -L chrUn_gl000231 -L chrUn_gl000232 -L chrUn_gl000233 -L chrUn_gl000234 -L chrUn_gl000235 -L chrUn_gl000236 -L chrUn_gl000237 -L chrUn_gl000238 -L chrUn_gl000239 -L chrUn_gl000240 -L chrUn_gl000241 -L chrUn_gl000242 -L chrUn_gl000243 -L chrUn_gl000244 -L chrUn_gl000245 -L chrUn_gl000246 -L chrUn_gl000247 -L chrUn_gl000248 -L chrUn_gl000249',
+				);
+				my $count;
+				foreach my $L_value (@L_list) {
+					$count++;
+					print VC "java -Xmx10g -Djava.io.tmpdir=$java_tmp -jar $gatk \\\n-T HaplotypeCaller \\\n-nct 10 \\\n-R $ref \\\n-I $sampleDir/$sampleId.$lib.final.bam \\\n--dbsnp $bin/db/gatk/dbsnp_138.hg19.vcf \\\n--genotyping_mode DISCOVERY \\\n-stand_emit_conf 10 \\\n-stand_call_conf 50 \\\n-o $sampleDir/$sampleId.variants.$count.vcf \\\n-BQSR $projectDir/$sampleId/$lib/$sampleId.$lib.dup.realign.grp \\\n$L_value &\n\n";
+				}
 			}
+			print VC "wait\n\n";
+			# 合并变异结果
+			print VC "if [ -s \"$sampleDir/$sampleId.variants.vcf\" ]; then rm $sampleDir/$sampleId.variants.vcf; fi\n\n";
+			print VC "grep \"^#\" $sampleDir/$sampleId.variants.1.vcf > $sampleDir/head.tmp\n";
+			print VC "cat $sampleDir/*.?.vcf | grep -v \"^#\" > $sampleDir/body.tmp\n";
+			print VC "cat $sampleDir/head.tmp $sampleDir/body.tmp > $sampleDir/$sampleId.variants.vcf\n";
+			print VC "rm $sampleDir/$sampleId.variants.?.vcf $sampleDir/head.tmp $sampleDir/body.tmp\n";
 			print VC "# Finished prepare!\n";
 			print VC "echo \"Finished prepare!\"\n";
 			close VC;
