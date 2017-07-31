@@ -20,7 +20,8 @@ db/bwa/ucsc.hg19.fasta.bwt
 db/bwa/ucsc.hg19.fasta
 db/annovar/0829/yang_OK/hg19_clinvar_20160802.txt
 db/annovar/0829/hg19_tfbsConsSites.txt
-db/annovar/0829/hg19_snp137_sort.txt/db/annovar/0829/hg19_refGeneMrna.fa
+db/annovar/0829/hg19_snp137_sort.txt
+db/annovar/0829/hg19_refGeneMrna.fa
 db/annovar/0829/hg19_refGeneMrna.fa
 db/annovar/0829/hg19_popfreq_all_20150413.txt.idx
 db/annovar/0829/hg19_popfreq_all_20150413.txt

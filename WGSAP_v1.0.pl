@@ -261,6 +261,7 @@ if ($step =~ /2/) {
 			# print BM "source /WORK/app/osenv/ln1/set2.sh\n\n" if (defined $target_region);
 			print BM "perl $bin/bin/QC_exome.pl -i $libDir/$sampleId.$lib.dup.bam -r $target_region -o $libDir/QC -plot &\n\n" if (defined $target_region);
 			print BM "perl $bin/bin/QC_wgs.pl -i $libDir/$sampleId.$lib.dup.bam -o $libDir/QC &\n\n" unless (defined $target_region);
+			print BM "if [ -s \"$libDir/QC/whole_genome.depth\" ]; then rm $libDir/QC/whole_genome.depth; fi\n\n";
 			# Local relignment
 			print BM "# Local relignment\n";
 			print BM "echo \"Local relignment\"\n";
@@ -335,7 +336,7 @@ if ($step =~ /3/ or $step =~ /4/) {
 			print VC "grep \"^#\" $sampleDir/$sampleId.variants.1.vcf > $sampleDir/head.tmp\n";
 			print VC "cat $sampleDir/*.?.vcf | grep -v \"^#\" > $sampleDir/body.tmp\n";
 			print VC "cat $sampleDir/head.tmp $sampleDir/body.tmp > $sampleDir/$sampleId.variants.vcf\n";
-			print VC "rm $sampleDir/$sampleId.variants.?.vcf $sampleDir/head.tmp $sampleDir/body.tmp\n";
+			print VC "rm $sampleDir/$sampleId.variants.?.vcf $sampleDir/$sampleId.variants.?.vcf.idx $sampleDir/head.tmp $sampleDir/body.tmp\n";
 			print VC "# Finished prepare!\n";
 			print VC "echo \"Finished prepare!\"\n";
 			close VC;
