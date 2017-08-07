@@ -150,3 +150,5 @@ foreach my $ch (sort keys %hash)
 	printf OUT "$ch\t%.2f%%\t%.2f\n",$cp,$dp;
 }
 close OUT;
+
+system("rm $outdir/whole_genome.depth") == 0 or die $!;

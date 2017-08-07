@@ -261,7 +261,7 @@ if ($step =~ /2/) {
 			# print BM "source /WORK/app/osenv/ln1/set2.sh\n\n" if (defined $target_region);
 			print BM "perl $bin/bin/QC_exome.pl -i $libDir/$sampleId.$lib.dup.bam -r $target_region -o $libDir/QC -plot &\n\n" if (defined $target_region);
 			print BM "perl $bin/bin/QC_wgs.pl -i $libDir/$sampleId.$lib.dup.bam -o $libDir/QC &\n\n" unless (defined $target_region);
-			print BM "if [ -s \"$libDir/QC/whole_genome.depth\" ]; then rm $libDir/QC/whole_genome.depth; fi\n\n";
+			# print BM "if [ -s \"$libDir/QC/whole_genome.depth\" ]; then rm $libDir/QC/whole_genome.depth; fi\n\n";
 			# Local relignment
 			print BM "# Local relignment\n";
 			print BM "echo \"Local relignment\"\n";
@@ -395,7 +395,7 @@ if ($step =~ /3/) {
 			print SA "perl $annovarDir/bin/pred_score.pl $snpDir/$sampleId.snps.all_variant_function.dbsnp.clinvar.freq.pred > $snpDir/$sampleId.snps.all_variant_function.dbsnp.clinvar.freq.pred.score\n\n";
 			print SA "perl $annovarDir/bin/add_file1_info_to_file2.pl $siteDB 6:8 $snpDir/$sampleId.snps.all_variant_function.dbsnp.clinvar.freq.pred.score > $snpDir/$sampleId.snps.all_variant_function.dbsnp.clinvar.freq.pred.score.children\n\n";
 			print SA "perl $annovarDir/bin/add_file1_info_to_file2.pl $bin/db/hgmd/hgmd_hg19.txt 6 $snpDir/$sampleId.snps.all_variant_function.dbsnp.clinvar.freq.pred.score.children > $snpDir/$sampleId.snps.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd\n\n";
-			print SA "perl $annovarDir/bin/phenotype.pl $snpDir/$sampleId.snps.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd  $annovarDir/0829/gene_phenotype.md > $snpDir/$sampleId.snps.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd.phenotype\n\n";
+			print SA "perl $annovarDir/bin/phenotype.pl $snpDir/$sampleId.snps.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd  $annovarDir/0829/gene_phenotype.20170807.md > $snpDir/$sampleId.snps.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd.phenotype\n\n";
 			print SA "sed -i '1i $variant_head' $snpDir/$sampleId.snps.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd.phenotype\n\n";
 			print SA "if [ -s \"$snpDir/$sampleId.snps.annotation.final.xls\" ]; then rm $snpDir/$sampleId.snps.annotation.final.xls; fi\n\n";
 			print SA "ln -s $snpDir/$sampleId.snps.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd.phenotype $snpDir/$sampleId.snps.annotation.final.xls\n\n";
@@ -459,7 +459,7 @@ if ($step =~ /4/) {
 			print IA "perl $annovarDir/bin/pred_score.pl $indelDir/$sampleId.indels.all_variant_function.dbsnp.clinvar.freq.pred > $indelDir/$sampleId.indels.all_variant_function.dbsnp.clinvar.freq.pred.score\n\n";
 			print IA "perl $annovarDir/bin/add_file1_info_to_file2.pl $siteDB 6:8 $indelDir/$sampleId.indels.all_variant_function.dbsnp.clinvar.freq.pred.score > $indelDir/$sampleId.indels.all_variant_function.dbsnp.clinvar.freq.pred.score.children\n\n";
 			print IA "perl $annovarDir/bin/add_file1_info_to_file2.pl $bin/db/hgmd/hgmd_hg19.txt 6 $indelDir/$sampleId.indels.all_variant_function.dbsnp.clinvar.freq.pred.score.children > $indelDir/$sampleId.indels.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd\n\n";
-			print IA "perl $annovarDir/bin/phenotype.pl $indelDir/$sampleId.indels.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd  $annovarDir/0829/gene_phenotype.md > $indelDir/$sampleId.indels.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd.phenotype\n\n";
+			print IA "perl $annovarDir/bin/phenotype.pl $indelDir/$sampleId.indels.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd  $annovarDir/0829/gene_phenotype.20170807.md > $indelDir/$sampleId.indels.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd.phenotype\n\n";
 			print IA "sed -i '1i $variant_head' $indelDir/$sampleId.indels.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd.phenotype\n\n";
 			print IA "if [ -s \"$indelDir/$sampleId.indels.annotation.final.xls\" ]; then rm $indelDir/$sampleId.indels.annotation.final.xls; fi\n\n";
 			print IA "ln -s $indelDir/$sampleId.indels.all_variant_function.dbsnp.clinvar.freq.pred.score.children.hgmd.phenotype $indelDir/$sampleId.indels.annotation.final.xls\n\n";

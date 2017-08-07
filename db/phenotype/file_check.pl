@@ -4,5 +4,6 @@ use warnings;
 
 while (<>) {
 	next if (/^#/);
-	print "$.\t$_"  if($_ !~ /^\w+(\t.*){0,3}/);
+	my @arr = split /\t/;
+	print "$.\t$_"  unless ($arr[0] && $arr[1] && $arr[2] && $arr[3]);
 }
