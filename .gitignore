@@ -28,3 +28,6 @@ db/annovar/0829/hg19_popfreq_all_20150413.txt
 db/annovar/0829/hg19_ljb26_all.txt
 db/annovar/0829/hg19_cosmic70.txt
 db/1000genomes/current.tree
+SV/freec/db/out100m1_hg19.gem
+SV/freec/db/out100m2_hg19.gem
+db/bwa/hg19_fa_split

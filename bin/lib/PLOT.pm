@@ -3,8 +3,7 @@ use strict;
 use warnings;
 use FindBin qw($Bin);
 
-#my $gnuplot="/usr/bin/gnuplot "; #spring add this item;time:2016.08.22
-my $gnuplot="gnuplot"; #spring add this item;time:2016.08.22
+my $gnuplot="gnuplot";
 my $convert="convert";
 
 

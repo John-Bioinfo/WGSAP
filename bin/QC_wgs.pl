@@ -28,7 +28,7 @@ die $usage if (!$bamfile || $help || !$outdir);
 
 my $Initial_bases_on_genome=3137161264;
 my $Total_effective_reads=0;
-my $Total_effective_yield=0;
+my $Total_effective_bases=0;
 my $Average_read_length=0;
 my $Base_covered_on_genome=0;
 my $Coverage_of_genome_region=0;
@@ -91,12 +91,14 @@ $mapping_rate=$mapped_reads/$clean_reads;
 $dup_rate=$dup_reads/$mapped_reads;
 
 `$bin/samtools_v0.1.18/samtools depth $bamfile >$outdir/whole_genome.depth`;
-$Total_effective_yield=`awk '{total+=\$3};END{print total}' $outdir/whole_genome.depth`;
-chomp $Total_effective_yield;
-$Average_read_length=$Total_effective_yield/$Total_effective_reads;
+$Total_effective_bases=`awk '{total+=\$3};END{print total}' $outdir/whole_genome.depth`;
+chomp $Total_effective_bases;
+$Average_read_length=$Total_effective_bases/$Total_effective_reads;
 
 my $tmp1=`awk '\$3 >=20 {total1++};\$3 >=10 {total2++};\$3 >=4 {total3++};END{print total1"\t"total2"\t"total3}' $outdir/whole_genome.depth`;
+$Base_covered_on_genome = `awk '\$3 >=1 {total++}; END {print total}' $outdir/whole_genome.depth`;
 chomp($tmp1);
+chomp $Base_covered_on_genome;
 my @info1;
 @info1=split /\t/,$tmp1;
 if(defined($info1[0]) or $info1[0]=0)
@@ -119,13 +121,12 @@ my $sample=(split /\./,$name)[0];
 open STAT,">$outdir/information.xls" or die $!;
 print STAT "Sample\t$sample\n";
 print STAT "Total effective reads\t$Total_effective_reads\n";
-printf STAT "Total effective yield(Mb)\t%.2f\n",$Total_effective_yield/1000000;
+printf STAT "Total effective bases(Mb)\t%.2f\n",$Total_effective_bases/1000000;
 printf STAT "Average read length(bp)\t%.2f\n",$Average_read_length;
-#print STAT "Base covered on genome\t$Base_covered_on_genome\n";
-#printf STAT "Coverage of genome region\t%.1f%%\n",100*$Coverage_of_genome_region;
-printf STAT "Fraction of genome covered with at least 20x\t%.1f%%\n",100*$Fraction_of_genome_covered_with_at_least_20x;
-printf STAT "Fraction of genome covered with at least 10x\t%.1f%%\n",100*$Fraction_of_genome_covered_with_at_least_10x;
-printf STAT "Fraction of genome covered with at least 4x\t%.1f%%\n",100*$Fraction_of_genome_covered_with_at_least_4x;
+printf STAT "Coverage of genome region\t%.2f%%\n", $Base_covered_on_genome/$Initial_bases_on_genome*100;
+printf STAT "Fraction of genome covered with at least 20x\t%.2f%%\n",100*$Fraction_of_genome_covered_with_at_least_20x;
+printf STAT "Fraction of genome covered with at least 10x\t%.2f%%\n",100*$Fraction_of_genome_covered_with_at_least_10x;
+printf STAT "Fraction of genome covered with at least 4x\t%.2f%%\n",100*$Fraction_of_genome_covered_with_at_least_4x;
 print STAT "Mapping rate\t",sprintf("%.2f%%",100*$mapping_rate),"\n";
 print STAT "Duplicate rate\t",sprintf("%.2f%%",100*$dup_rate),"\n";
 close STAT;
@@ -137,7 +138,7 @@ while (<IN>)
 {
 	chomp;
 	my ($chr,$dd)=(split /\t/,$_)[0,2];
-	$cov{$chr}++;
+	$cov{$chr}++ if($dd > 0);
 	$dep{$chr}+=$dd;
 }
 close IN;

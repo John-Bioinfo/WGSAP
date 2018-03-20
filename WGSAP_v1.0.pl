@@ -17,6 +17,7 @@ my $ft_para = "-n 0.1 -l 5 -q 0.5 -Q 2 -G -5 1"; # if add -i, it will be very sl
 my $bwa_t = 8;
 my $siteDB = `ls -t $bin/db/dbsnv/*.db | head -1`;
 chomp $siteDB;
+my $stat;
 #print "$siteDB\n";
 #exit;
 
@@ -87,6 +88,7 @@ NOTE
 		-t <i>			set Number of data threads to allocate to this analysis, default $t
 		-at <str>		specify the annotation method, default "$at"
 		-dp <i>			variation filter according to read depth, default $DP
+		-stat                  wether stat sample information, default not stat
 	$guide_separator Filter $guide_separator
 		-ft_h <str>		print soapnuke filter help information
 		-ft_para <str>		set the parameter for SOAPnuke filter, default "$ft_para"
@@ -114,6 +116,7 @@ GetOptions(
 	"t=i" => \$t,
 	"at=s" => \$at,
 	"dp=i" => \$DP,
+	"stat" => \$stat,
 	"ft_h" => \$ft_h,
 	"ft_para=s" => \$ft_para,
 	"ag_h" => \$ag_h,
@@ -140,12 +143,10 @@ system("mkdir -p $ResultDir") == 0 || die $!;
 # fq1     fq2     sampleId        lib     lane 
 my $sampleList = shift;
 my %sampleInfo;
-my $sample_total;
 open SI, $sampleList or die $!;
 while (<SI>) {
 	next if (/^#/);
 	chomp;
-	$sample_total++;
 	my @arr = split /\s+/;
 	system("echo \"# Main Script\" > $projectDir/$arr[2].sh") == 0 || die $!;
 	push @{$sampleInfo{$arr[2]}{$arr[3]}{$arr[4]}}, ($arr[0], $arr[1]);
@@ -153,8 +154,9 @@ while (<SI>) {
 }
 close SI;
 #print Dumper \%sampleInfo;
+my $sample_total = keys %sampleInfo;
 
-&sample_stat_log($sample_total);
+&sample_stat_log($sample_total) if (defined $stat);
 
 # Step1 : Data Filter
 if ($step =~ /1/) {
@@ -167,7 +169,15 @@ if ($step =~ /1/) {
 				open FT, ">$laneDir/CleanData/$sampleId.$lib.$lane.ft.sh" or die $!;
 				print FT "# Step1 : Data Filter\n";
 				print FT "echo \"Step1 : Data Filter Running!\"\n\n";
-				print FT "$soapnuke filter -1 $fq1 -2 $fq2 $ft_para -o $laneDir/CleanData -C $laneDir/CleanData/$sampleId.$lib.$lane.1.clean.fq.gz -D $laneDir/CleanData/$sampleId.$lib.$lane.2.clean.fq.gz\n\n";
+				my $fq1_adapter_list = $fq1;
+				$fq1_adapter_list =~ s/fq.gz$/adapter.list.gz/;
+				my $fq2_adapter_list = $fq2;
+				$fq2_adapter_list =~ s/fq.gz$/adapter.list.gz/;
+				if (-e $fq1_adapter_list && -e $fq2_adapter_list) {
+					print FT "$soapnuke filter -1 $fq1 -2 $fq2 -f $fq1_adapter_list -r $fq2_adapter_list $ft_para -o $laneDir/CleanData -C $laneDir/CleanData/$sampleId.$lib.$lane.1.clean.fq.gz -D $laneDir/CleanData/$sampleId.$lib.$lane.2.clean.fq.gz\n\n";
+				} else {
+					print FT "$soapnuke filter -1 $fq1 -2 $fq2 $ft_para -o $laneDir/CleanData -C $laneDir/CleanData/$sampleId.$lib.$lane.1.clean.fq.gz -D $laneDir/CleanData/$sampleId.$lib.$lane.2.clean.fq.gz\n\n";
+				}
 				print FT "$bin/bin/soapnuke_stat.pl $laneDir/CleanData/Basic_Statistics_of_Sequencing_Quality.txt $laneDir/CleanData/Statistics_of_Filtered_Reads.txt > $laneDir/CleanData/$sampleId.$lib.$lane.stat &\n\n";
 				print FT "$bin/bin/fqcheck33 -r $laneDir/CleanData/$sampleId.$lib.$lane.1.clean.fq.gz -c $laneDir/CleanData/$sampleId.$lib.$lane.1.fqcheck &\n\n";
 				print FT "$bin/bin/fqcheck33 -r $laneDir/CleanData/$sampleId.$lib.$lane.2.clean.fq.gz -c $laneDir/CleanData/$sampleId.$lib.$lane.2.fqcheck &\n\n";
@@ -225,6 +235,7 @@ if ($step =~ /2/) {
 				#print AG "java -Xmx20g -jar $picard ReorderSam I=$laneDir/Alignment/$sampleId.$lib.$lane.bam O=$laneDir/Alignment/$sampleId.$lib.$lane.reorder.bam R=$ref\n\n";	
 				print AG "java -Xmx20g -Djava.io.tmpdir=$java_tmp -jar $picard SortSam I=$laneDir/Alignment/$sampleId.$lib.$lane.bam O=$laneDir/Alignment/$sampleId.$lib.$lane.sort.bam SORT_ORDER=coordinate\n\n";	
 				print AG "rm $laneDir/Alignment/$sampleId.$lib.$lane.bam\n\n";
+				print AG "rm $laneDir/CleanData/$sampleId.$lib.$lane.1.clean.fq.gz $laneDir/CleanData/$sampleId.$lib.$lane.2.clean.fq.gz\n\n";
 				if ((keys %{$sampleInfo{$sampleId}{$lib}}) == 1) {
 					print AG "ln -s $laneDir/Alignment/$sampleId.$lib.$lane.sort.bam $libDir/$sampleId.$lib.bam\n\n";
 				} else {
@@ -491,7 +502,10 @@ if ($step =~ /3/ && $step =~ /4/) {
 
 system("ls $projectDir/*.sh | while read i; do sh $bin/bin/Add_time_for_script.sh \$i; done") == 0 || die $!;
 system("chmod 755 $projectDir/*.sh") == 0 || die $!;
-system("ls $projectDir/*.sh > $projectDir/script.lst") == 0 || die $!;
+system("ls $projectDir/*.sh | grep -v 'run.sh' > $projectDir/script.lst") == 0 || die $!;
+open RUN, ">$projectDir/run.sh" or die $!;
+print RUN "cat $projectDir/script.lst | while read i; do qsub -l nodes=1:ppn=$t -o \$i.o -e \$i.e \$i; done\n"; 
+close RUN;
 
 sub sample_stat_log {
         my $total = shift;

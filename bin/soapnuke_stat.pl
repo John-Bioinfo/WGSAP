@@ -74,15 +74,19 @@ while (<IN>)
 	next if($arr[0] eq 'Item');
 	if($arr[0] =~ /^Read with n rate exceed:/)
 	{
-		$hash{'nr'}=$arr[1];
+		$hash{'nr'}=sprintf("%.2f%%", $arr[1]/$hash{'tr_r'}*100);
 	}
 	if($arr[0] =~ /^Reads with low quality/)
 	{
-		$hash{'lr'}=$arr[1];
+		$hash{'lr'}=sprintf("%.2f%%", $arr[1]/$hash{'tr_r'}*100);
 	}
 	if($arr[0] =~ /^Reads with adapter/)
 	{
-		$hash{'ar'}=$arr[1];
+		$hash{'ar'}=sprintf("%.2f%%", $arr[1]/$hash{'tr_r'}*100);
+	}
+	if($arr[0] =~ /^Reads with duplications/)
+	{
+		$hash{'dup'}=sprintf("%.2f%%", $arr[1]/$hash{'tr_r'}*100);
 	}
 }
 close IN;
@@ -106,3 +110,4 @@ print "Q30(%) of fq2:\t$hash{'q30_2r'}\t$hash{'q30_2c'}\n";
 print "Discard Reads related to N:\t$hash{'nr'}\n";
 print "Discard Reads related to low qual:\t$hash{'lr'}\n";
 print "Discard Reads related to Adapter:\t$hash{'ar'}\n";
+print "Discard Reads related to duplications:\t$hash{'dup'}\n";
