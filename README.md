@@ -6,6 +6,8 @@ fq statistics
 
 trim raw fq
 
-Whole Genome sequencing analysis
+ * Whole Genome sequencing
+
+ * Whole Exon sequencing
 
 SV detection and so on.
